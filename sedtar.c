@@ -71,11 +71,17 @@ int main(int argc, char *argv[], char *envp[]) {
     setvbuf(sed_w, NULL, _IONBF, 0);
     FILE *sed_r = fdopen(outpipe[0], "r");
 
+    char out_filename[PATH_MAX];
+    out_filename[0] = '\0';
+    if (realpath("/dev/stdout", out_filename) == NULL) {
+        // do nothing
+    }
+
     struct archive *aout = archive_write_new();
     if (aout == NULL) {
         fatal(NULL, "failed to initialize archive writer");
     }
-    if (archive_write_set_format_pax_restricted(aout) != ARCHIVE_OK) {
+    if (archive_write_set_format_filter_by_ext_def(aout, out_filename, ".tar") != ARCHIVE_OK) {
         fatal_archive(NULL, aout);
     }
     if (archive_write_open_filename(aout, NULL) != ARCHIVE_OK) {
