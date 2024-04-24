@@ -1,11 +1,13 @@
 #include <archive.h>
 #include <archive_entry.h>
+#include <fcntl.h>
 #include <linux/limits.h>
 #include <spawn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 static const char *program_name;
 
@@ -48,15 +50,13 @@ int main(int argc, char *argv[], char *envp[]) {
 
     pid_t pid;
     int inpipe[2], outpipe[2];
-    if (pipe(inpipe) || pipe(outpipe)) {
+    if (pipe2(inpipe, O_CLOEXEC) || pipe2(outpipe, O_CLOEXEC)) {
         fatal(NULL, NULL);
     }
     posix_spawn_file_actions_t file_actions;
     if (posix_spawn_file_actions_init(&file_actions) ||
         posix_spawn_file_actions_adddup2(&file_actions, inpipe[0], STDIN_FILENO) ||
-        posix_spawn_file_actions_addclose(&file_actions, inpipe[1]) ||
-        posix_spawn_file_actions_adddup2(&file_actions, outpipe[1], STDOUT_FILENO) ||
-        posix_spawn_file_actions_addclose(&file_actions, outpipe[0])) {
+        posix_spawn_file_actions_adddup2(&file_actions, outpipe[1], STDOUT_FILENO)) {
         fatal(NULL, NULL);
     }
     if (posix_spawn(&pid, "/usr/bin/sed", &file_actions, NULL,
@@ -68,7 +68,7 @@ int main(int argc, char *argv[], char *envp[]) {
     close(outpipe[1]);
 
     FILE *sed_w = fdopen(inpipe[1], "w");
-    setvbuf(sed_w, NULL, _IONBF, 0);
+    setbuf(sed_w, NULL);
     FILE *sed_r = fdopen(outpipe[0], "r");
 
     char out_filename[PATH_MAX];
