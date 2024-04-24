@@ -41,7 +41,7 @@ static int copy_data(struct archive *aout, struct archive *ain) {
 
 int main(int argc, char *argv[], char *envp[]) {
     program_name = argv[0];
-    if (argc < 2) {
+    if (argc < 2 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
         fprintf(stderr, "usage: %s EXPRESSION [FILE...]\n", program_name);
         return 2;
     }
