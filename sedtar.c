@@ -9,6 +9,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define EXIT_INVALID_ARG 1
+#define EXIT_FATAL 4
+
 static const char *program_name;
 
 static void fatal(const char *filename, const char *msg) {
@@ -17,7 +20,7 @@ static void fatal(const char *filename, const char *msg) {
     } else {
         perror(filename ? filename : program_name);
     }
-    exit(1);
+    exit(EXIT_FATAL);
 }
 
 static void fatal_archive(const char *filename, struct archive *a) {
@@ -45,7 +48,7 @@ int main(int argc, char *argv[], char *envp[]) {
     program_name = argv[0];
     if (argc < 2 || strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
         fprintf(stderr, "usage: %s EXPRESSION [FILE...]\n", program_name);
-        return 2;
+        return EXIT_INVALID_ARG;
     }
 
     pid_t pid;
@@ -181,5 +184,5 @@ int main(int argc, char *argv[], char *envp[]) {
         fatal(NULL, NULL);
     }
 
-    return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 1;
+    return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : EXIT_FATAL;
 }
