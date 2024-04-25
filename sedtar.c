@@ -145,7 +145,6 @@ int main(int argc, char *argv[], char *envp[]) {
                 fatal(pathname, "path length limit exceeded after sed");
             }
             if (p == newpath) {
-                fprintf(stderr, "%s: empty filename after sed; skipping\n", pathname);
                 continue;
             }
             archive_entry_set_pathname(entry, newpath);
