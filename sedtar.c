@@ -1,3 +1,5 @@
+// Copyright (C) 2024 Misaki Kasumi <misakikasumi@outlook.com>
+
 #include <archive.h>
 #include <archive_entry.h>
 #include <fcntl.h>
